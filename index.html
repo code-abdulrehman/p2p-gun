@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>P2P Synced Text</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Gun.js -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded shadow-lg w-full max-w-xl">
+    <h1 class="text-2xl font-bold mb-4 text-center text-indigo-700">🔁 Real-time Synced Text (P2P)</h1>
+    
+    <input
+      id="sharedInput"
+      type="text"
+      class="w-full p-3 border border-indigo-300 rounded focus:ring-2 focus:ring-indigo-500"
+      placeholder="Start typing... synced in real-time"
+    />
+    
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      Open this page on another device/browser to see live updates.
+    </p>
+  </div>
+
+  <script>
+    // Initialize Gun with public peer
+    const gun = Gun({
+      peers: ['https://gun-manhattan.herokuapp.com/gun']
+    });
+
+    const sharedState = gun.get('live-input');
+
+    const input = document.getElementById('sharedInput');
+
+    // Send text to peers on input change
+    input.addEventListener('input', () => {
+      sharedState.put({ text: input.value });
+    });
+
+    // Receive updates from peers
+    sharedState.on(data => {
+      if (data && data.text !== input.value) {
+        input.value = data.text;
+      }
+    });
+  </script>
+
+</body>
+</html>
